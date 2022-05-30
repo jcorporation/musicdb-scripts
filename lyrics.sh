@@ -5,8 +5,9 @@
 # https://github.com/jcorporation/musicdb-scripts
 #
 
-PLUGIN_DIR=$(dirname "$0")
-PLUGINS=$(echo "$PLUGIN_DIR"/lyrics/*.py)
+REALNAME=$(realpath "$0")
+SCRIPT_DIR=$(dirname "$REALNAME")
+PLUGINS=$(echo "$SCRIPT_DIR"/lyrics/*.py)
 DIRECTORY=$1
 
 print_usage() {
