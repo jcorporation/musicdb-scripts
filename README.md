@@ -28,17 +28,18 @@ A script to download artistart from [fanart.tv](https://fanart.tv/).
 
 ## Lyrics download script
 
-A script to download lyrics based on the [https://github.com/MusicPlayerDaemon/ncmpc/tree/master/lyrics](ncmpc plugins).
+A script to download lyrics based on the [ncmpc plugins](https://github.com/MusicPlayerDaemon/ncmpc/tree/master/lyrics).
 
 The script tries all plugins from the lyrics folder and adds all the results to a .txt file. You should afterwards edit this file and select the best result.
 
 ```
 Usage: lyric.sh <file|directory>
-
 ```
 
 - Works only for ID3v2 tagged MP3 files
 - If you provide a directory the script searches recursively for MP3 files
 - Name of the result file is the name of the MP3 file with .txt extension
 
-**Depenedencies**: python, mid3v2 (mutagen)
+**Dependencies**: python, mid3v2 (mutagen)
+
+Run `lyrics/update.sh` to update the lyrics plugins from the ncmpc repository.
