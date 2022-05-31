@@ -1,6 +1,6 @@
 # musicdb-scripts
 
-This repository provides bash scripts to download images and lyrics for your music files.
+This repository provides shell scripts to download images and lyrics for your music files.
 
 ## Albumart download and resize script
 
