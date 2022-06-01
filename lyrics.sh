@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # myMPD (c) 2018-2022 Juergen Mang <mail@jcgames.de>
@@ -7,7 +7,24 @@
 
 REALNAME=$(realpath "$0")
 SCRIPT_DIR=$(dirname "$REALNAME")
-PLUGINS=$(echo "$SCRIPT_DIR"/lyrics/*.py)
+if [ -d "$SCRIPT_DIR/lyrics" ]
+then
+    PLUGINS=$(echo "$SCRIPT_DIR"/lyrics/*.py)
+elif [ -d "/usr/lib/lyrics" ]
+then
+    PLUGINS=$(echo /usr/lib/lyrics/*.py)
+elif [ -d "/usr/local/lib/lyrics" ]
+then
+    PLUGINS=$(echo /usr/local/lib/lyrics/*.py)
+else
+    echo "Lyric plugin folder not found, tried:"
+    echo "  - $SCRIPT_DIR/lyrics/"
+    echo "  - /usr/lib/lyrics"
+    echo "  - /usr/local/lib/lyrics"
+    echo ""
+    exit 1 
+fi
+
 DIRECTORY=$1
 
 print_usage() {
@@ -25,13 +42,10 @@ print_usage() {
 [ -z "$DIRECTORY" ] && print_usage
 
 download_lyrics() {
-    local MEDIA_FILE=$1
-    local LYRICS_FILE
+    MEDIA_FILE=$1
     LYRICS_FILE="$(dirname "$FILE")/$(basename "$FILE" .mp3).txt"
     [ -s "$LYRICS_FILE" ] && return
-    local ARTIST
     ARTIST=$(mid3v2 "$MEDIA_FILE" 2>/dev/null | grep "^TPE1=")
-    local TITLE
     TITLE=$(mid3v2 "$MEDIA_FILE" 2>/dev/null | grep "^TIT2=")
 
     ARTIST=${ARTIST#*=}
@@ -45,7 +59,6 @@ download_lyrics() {
         echo "Trying $PLUGIN_NAME"
         if TEXT=$($PLUGIN "$ARTIST" "$TITLE" 2>/dev/null)
         then
-            [[ $TEXT =~ "<!-- bot ban -->" ]] && continue # azlyrics block
             if [ "$TEXT" != "" ]
             then
                 {
@@ -67,8 +80,8 @@ then
     download_lyrics "$DIRECTORY"
 elif [ -d "$DIRECTORY" ]
 then
-    while read -r FILE
+    find "$DIRECTORY" -name \*.mp3 | while read -r FILE
     do
         download_lyrics "$FILE"
-    done < <(find "$DIRECTORY" -name \*.mp3)
+    done
 fi

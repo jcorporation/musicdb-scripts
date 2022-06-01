@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # myMPD (c) 2018-2022 Juergen Mang <mail@jcgames.de>
@@ -66,7 +66,7 @@ resize_image() {
 }
 
 resize_albumart() {
-    while read -r IMAGE
+    find "$MUSIC_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png"  -o -iname "*.webp" \) | grep -i -E "$ALBUMART_REGEX" | while read -r IMAGE
     do
         IMAGE_PATH=$(dirname "$IMAGE")
         IMAGE_NAME=$(basename "$IMAGE")
@@ -117,11 +117,11 @@ resize_albumart() {
                 resize_image "$NEW_THUMB_FULL_PATH" "$THUMB_DIM"
             fi
         fi
-    done < <(find "$MUSIC_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png"  -o -iname "*.webp" \) | grep -i -E "$ALBUMART_REGEX")
+    done
 }
 
 check_albumart_sizes() {
-    while read -r IMAGE
+    find "$MUSIC_DIR" -type f \( -name "$THUMB_NAME" -o -name "$NEW_ALBUMART_NAME" -o -name "$FULL_SIZE_NAME" \) | while read -r IMAGE
     do
         IMAGE_NAME=$(basename "$IMAGE")
         SIZE=$(get_image_size "$IMAGE")
@@ -139,11 +139,11 @@ check_albumart_sizes() {
                 [ "$HEIGHT" -lt "$NEW_ALBUMART_DIM" ] && echo "$IMAGE height is $HEIGHT, should be ge $NEW_ALBUMART_DIM"
             ;;
         esac
-    done < <(find "$MUSIC_DIR" -type f \( -name "$THUMB_NAME" -o -name "$NEW_ALBUMART_NAME" -o -name "$FULL_SIZE_NAME" \))
+    done
 }
 
 download_albumart() {
-    while read -r DIR
+    find "$MUSIC_DIR" -type d | while read -r DIR
     do
         IMAGE_FULL_PATH="${DIR}/${NEW_ALBUMART_NAME}"
         if [ -s "$IMAGE_FULL_PATH" ]
@@ -165,7 +165,7 @@ download_albumart() {
             echo "No MBID found for \"$FIRST\""
             continue
         fi
-        echo -n "Download albumart for $DIR: "
+        printf "Download albumart for %s: " "$DIR"
         if wget -q "https://coverartarchive.org/release/$MBID/front" -O "$IMAGE_FULL_PATH.tmp"
         then
             convert "$IMAGE_FULL_PATH.tmp" "$IMAGE_FULL_PATH.tmp.webp"
@@ -177,11 +177,11 @@ download_albumart() {
             rm -f "$IMAGE_FULL_PATH.tmp"
             echo "failed"
         fi
-    done < <(find "$MUSIC_DIR" -type d)
+    done
 }
 
 check_albumart_missing() {
-    while read -r DIR
+    find "$MUSIC_DIR" -type d | while read -r DIR
     do
         MUSIC_FILE=$(find "$DIR" -maxdepth 1 -type f -iname \*.mp3 | head -1)
         if [ "$MUSIC_FILE" != "" ]
@@ -189,7 +189,7 @@ check_albumart_missing() {
             [ -f "$DIR/${NEW_ALBUMART_NAME}" ] || echo "Missing coverimage: $DIR"
             [ -f "$DIR/${THUMB_NAME}" ] || echo "Missing thumbnail: $DIR"
         fi
-    done < <(find "$MUSIC_DIR" -type d)
+    done
 }
 
 [ -z "$MUSIC_DIR" ] && print_usage

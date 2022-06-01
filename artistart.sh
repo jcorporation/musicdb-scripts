@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # myMPD (c) 2018-2022 Juergen Mang <mail@jcgames.de>
@@ -54,16 +54,16 @@ resize_image() {
 }
 
 download() {
-    local MBID=$1
-    local NAME=$2
+    MBID=$1
+    NAME=$2
     echo "Downloading artistart for \"$NAME\""
     THUMBS=$(wget -q "${URI}${MBID}?api_key=${API_KEY}" -O - | jq ".artistthumb")
-    if [ "$THUMBS" == "null" ]
+    if [ "$THUMBS" = "null" ]
     then
         echo "Not found."
         return 1
     fi
-    URL=$(jq -r ".[] | .url" <<< "$THUMBS" | head -1)
+    URL=$(printf "%s" "$THUMBS" | jq -r ".[] | .url" | head -1)
     if [ "$URL" != "" ] && wget -q "$URL" -O "$OUT_PATH/$NAME.tmp"
     then
         convert "$OUT_PATH/$NAME.tmp" "$OUT_PATH/$NAME.webp"
